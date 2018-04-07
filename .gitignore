@@ -1,3 +1,4 @@
 ﻿*.vs
 *.Rhistory
-data/user.json
+data/
+.Rproj.user
