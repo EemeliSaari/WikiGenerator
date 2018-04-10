@@ -18,7 +18,7 @@ read_user <- function(file_path) {
 vec_to_string <- function(data, sep=' ') {
     string <- data[1]
     for (value in data[-1]) {
-        string = paste(string, value, sep=sep)
+        string = paste(string, toString(value), sep=sep)
     }
     return(string)
 }
@@ -37,10 +37,12 @@ parse_line <- function(line, sep) {
     return(parts)
 }
 
-load_titles <- function(file, from, to) {
+load_id_content <- function(file, from, to, normalize=TRUE, index = 3) {
     return(unlist(lapply(scan(file, '', skip = from, nlines = to, sep = '\n', quiet = TRUE),
                 FUN = function(x) {
-                    out <- parse_line(x, sep=';')[3]
+                    if (normalize == TRUE)
+                        x = gsub(' ', '_', x)
+                    out <- parse_line(x, sep = ';')[index]
                 }
             )
         )
