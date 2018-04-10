@@ -17,7 +17,7 @@ Client <- setRefClass('Client',
     ),
     methods = list(
         login = function(verbose=FALSE) {
-          "Login method to login the user. Returns FALSE if the login fails, TRUE if success."
+            "Login method to login the user. Returns FALSE if the login fails, TRUE if success."
 
             token_action <- list(action = 'query', params = list(meta = 'tokens', type = 'login', format = 'json'))
             token_response <- do_query(token_action)
@@ -41,7 +41,7 @@ Client <- setRefClass('Client',
 
             if (verbose == TRUE)
                 print(login_result)
-            
+
             if (login_result$login$result == "Success") {
                 return(list(status=TRUE))
             }
@@ -52,15 +52,20 @@ Client <- setRefClass('Client',
         logout = function() {
             do_query(list(action = 'logout', params = list(format = 'json')))
         },
-        do_query = function(query, verbose=FALSE) {
-          "Queries the end_point with query. Query must be in list format: action='', params = list(p1='',p2=''...)"
-            
-            query_body <- paste('?action=', query$action, sep='')
-            for(param in names(query$params)) {
+        do_query = function(query, redirects=FALSE, verbose=FALSE) {
+            "Queries the end_point with query. Query must be in list format: action='', params = list(p1='',p2=''...)"
+
+            query_body <- paste('?action=', query$action, sep = '')
+
+            if (redirects == TRUE) {
+                query_body = paste(query_body, '&redirects&', sep = '')
+            }
+
+            for (param in names(query$params)) {
                 value <- unlist(unname(query$params[param]))
                 query_body <- paste(query_body, '&', param, '=', value, sep='')
             }
-            url <- paste(end_point, query_body, sep='')
+            url <- paste(end_point, query_body, sep = '')
             result <- GET(url)
 
             if (verbose == TRUE)
@@ -82,10 +87,10 @@ Client <- setRefClass('Client',
 
 
 test_login <- function() {
-  "Test a simple login scenario"
+    "Test a simple login scenario"
 
     user_data <- read_user('data/user_data.json')
-    
+
     client <- Client(user_name = user_data$name, password = user_data$password, end_point=BASE_URL)
     login_result <- client$login()
     if (login_result$status == FALSE)
@@ -94,16 +99,16 @@ test_login <- function() {
     logout_result <- client$logout()
     if (logout_result$status == FALSE)
         return('LogoutError')
-    
+
     return('Passed')
 }
 
 
 test_query <- function() {
-  "Test the query method"
+    "Test the query method"
 
     user_data <- read_user('data/user_data.json')
-    
+
     query <- list(action = 'query', params = list(meta = 'tokens', type = 'login', format = 'json'))
     client <- Client(user_name = user_data$name, password = user_data$password, end_point=BASE_URL)
     result <- client$do_query(query)
@@ -112,5 +117,3 @@ test_query <- function() {
     else
         return('Passed')
 }
-
-test_login()
