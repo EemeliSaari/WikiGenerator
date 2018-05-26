@@ -3,84 +3,173 @@
 library(methods)
 
 
-WikiTextParser <- setRefClass(
-    Class = 'WikiTextParser',
-    fields = list(
-        engine = 'S4',
-        data = 'S4'
-    ),
-    methods = list(
-        init = function(raw_data) {
-            
-        }
-    )
+WikiData <- setClass(
+  Class = 'WikiData',
+  
+  slots = c(
+    raw = 'character',
+    parts = 'list'
+  )
 )
 
 
 WikiNode <- setRefClass(
-    Class = 'WikiNode',
-    fields = list(
-        type = 'character'
-    ),
-    methods = list(
-        run = function() {
-            #TODO
-        }
-    )
+  Class = 'WikiNode',
+  fields = list(
+    type = 'character',
+    style = 'list',
+    content = 'character',
+    tokens = 'numeric'
+  )
 )
 
 
 ParserEngine <- setRefClass(
-    Class = 'WikiTextParser',
-    fields = list(
-        raw_text = 'character',
-        text_parts = 'list',
-        options = 'list'
-    ),
-    methods = list(
-        get_parsed_text = function() {
-            
-        },
-        parse_sections = function() {
-            #TODO parse different sections of the text
-        },
-        parse_list = function() {
-            #TODO parse different lists
-        },
-        parse_identity_text = function() {
-            #TODO
-        },
-        parse_redirects = function() {
-            #TODO
-        },
-        parse_sitations = function() {
-            #TODO
-        },
-        parse_links = function() {
-            #TODO
-        },
-        parse_tags = function() {
-            tags <- c('u', 's', 'p')
-            #TODO
-        },
-        parse_text_formating = function() {
-              
-        },
-        parse_hidden = function() {
-            #TODO
-        },
-        parse_images = function() {
-            #TODO
-        },
-        parse_category = function() {
-            #TODO
-        },
-        get_valid_options = function() {
-            #TODO returns a summary of options
+  Class = 'ParserEngine',
+
+  methods = list(
+    parse_sections = function() {
+      #TODO parse different sections of the text
+    },
+    parse_list = function() {
+      #TODO parse different lists
+    },
+    parse_identity_text = function() {
+      #TODO
+    },
+    parse_redirects = function() {
+      #TODO
+    },
+    parse_sitations = function() {
+      #TODO
+    },
+    parse_links = function(x) {
+      #TODO
+      out <- 'asd'
+    },
+    parse_tags = function(x) {
+      tags <- c('u', 's', 'p')
+      #TODO
+      out <- paste(x, 'p', sep='')
+    },
+    parse_text_formating = function() {
+        #TODO
+    },
+    parse_hidden = function() {
+      #TODO
+    },
+    parse_images = function() {
+      #TODO
+    },
+    parse_category = function() {
+      #TODO
+    },
+    get_parts = function(raw) {
+        index <- 1
+        parts <- list()
+        for(line in raw) {
+            if(line == "") {
+                index = index + 1
+                next
+            }
+            if(length(parts) < index) {
+                parts[[index]] <- c(line)
+            }
+            else {
+                parts[[index]] <- c(parts[[index]], line)
+            }
         }
-    )
+        return(parts)
+    }
+  )
 )
 
+
+WikiParser <- setClass(
+    Class = 'WikiParser',
+
+    slots = c(
+        options = 'list',
+        engine = 'ParserEngine',
+        data = 'WikiData'
+    ),
+
+    prototype = list(
+        options = list(
+            #TODO
+        ),
+        engine = ParserEngine(),
+        data = WikiData()
+    ),
+    
+    validity = function(object) {
+        #TODO check the options
+        return(TRUE)
+    }
+)
+
+
+setGeneric(
+    name = 'parse_text',
+    def = function(obj, text) {
+        standardGeneric('parse_text')
+    }
+)
+
+
+setMethod(
+    f = 'parse_text',
+    signature = 'WikiParser',
+    definition = function(obj, text) {
+        print('Starting the parsing...')
+        return(lapply(obj@engine$get_parts(text), FUN=function(x) {
+            entry <- x
+            for(option in names(obj@options)) {
+                if(obj@options[[option]] == TRUE) {
+                    command <- paste('obj@engine$parse_', option, '(entry)', sep='')
+                    entry <- eval(parse(text=command))
+                }
+            }
+            out <- entry
+        }))
+    }
+)
+
+
+setGeneric(
+    name = 'set_options',
+    def = function(obj, options) {
+        standardGeneric('set_options')
+    }
+)
+
+
+setMethod(
+     f = 'set_options',
+     signature = 'WikiParser',
+     definition = function(obj, options) {
+        "Configures the parser options - takes in a named list of options:"
+
+     }
+)
+
+
+setGeneric(
+    name = 'clear',
+    def = function(obj) {
+        standardGeneric('clear')
+    }
+)
+
+
+setMethod(
+    f = 'clear',
+    signature = 'WikiParser',
+    definition = function(obj) {
+        obj$data <- WikiData()
+        #return(NULL)
+    }
+)
 
 parse_files <- function(folder, target) {
     "Parse all the wikitext files from a folder."
@@ -90,13 +179,15 @@ parse_files <- function(folder, target) {
 
 test_parse <- function() {
     example_data <- unlist(readLines('data/articles/12055.txt'))
-    test_options <- list(tags = FALSE)
+    test_options <- list(tags = TRUE, links = TRUE)
     print(typeof(test_options))
 
-    parser <- ParserEngine(raw_text = example_data, options = test_options)
+    parser <- WikiParser(options = test_options)
+    print('asd')
     print(typeof(parser))
-    parser$get_parsed_text()
-    
+    print(typeof(example_data))
+    #print(parser$options)
+    print(parse_text(parser, example_data))
     return(NULL)
 }
 
