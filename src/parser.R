@@ -28,59 +28,80 @@ ParserEngine <- setRefClass(
   Class = 'ParserEngine',
 
   methods = list(
-    parse_sections = function() {
-      #TODO parse different sections of the text
-    },
-    parse_list = function() {
-      #TODO parse different lists
-    },
-    parse_identity_text = function() {
-      #TODO
-    },
-    parse_redirects = function() {
-      #TODO
-    },
-    parse_sitations = function() {
-      #TODO
-    },
-    parse_links = function(x) {
-      #TODO
-      out <- 'asd'
-    },
-    parse_tags = function(x) {
-      tags <- c('u', 's', 'p')
-      #TODO
-      out <- paste(x, 'p', sep='')
-    },
-    parse_text_formating = function() {
+      parse_sections = function() {
+        #TODO parse different sections of the text
+      },
+      parse_list = function() {
+        #TODO parse different lists
+      },
+      parse_identity_text = function() {
         #TODO
-    },
-    parse_hidden = function() {
-      #TODO
-    },
-    parse_images = function() {
-      #TODO
-    },
-    parse_category = function() {
-      #TODO
-    },
-    get_parts = function(raw) {
-        index <- 1
-        parts <- list()
-        for(line in raw) {
-            if(line == "") {
-                index = index + 1
-                next
-            }
-            if(length(parts) < index) {
-                parts[[index]] <- c(line)
-            }
-            else {
-                parts[[index]] <- c(parts[[index]], line)
-            }
-        }
-        return(parts)
-    }
+      },
+      parse_sitations = function() {
+        #TODO
+      },
+      parse_links_internal = function(x) {
+          patterns <- list(
+              list(pattern="", group='')
+          )
+          return(parse_method(patterns, x))
+      },
+      parse_links_external = function(x) {
+          patterns <- list(
+              list(pattern="\\[.*?\\s(.*?)\\]", group='\\1'), 
+              list(pattern="https?://[^\\s]*", group='')
+          )
+          return(parse_method(patterns, x))
+      }
+      parse_tags = function(x) {
+  
+          tags <- c('u', 's', 'p')
+          patterns <- c(
+              list(pattern='<.*?>', group='')
+          )
+          return(parse_method(patterns, x))
+      },
+      parse_text_formating = function() {
+          #TODO
+      },
+      parse_hidden = function() {
+        #TODO
+      },
+      parse_images = function() {
+        #TODO
+      },
+      parse_category = function() {
+        #TODO
+      },
+      get_parts = function(raw) {
+          index <- 1
+          parts <- list()
+          for(line in raw) {
+              if(line == "") {
+                  index = index + 1
+                  next
+              }
+              if(length(parts) < index) {
+                  parts[[index]] <- c(line)
+              }
+              else {
+                  parts[[index]] <- c(parts[[index]], line)
+              }
+          }
+          return(parts)
+      },
+      parse_method = function(patterns, text) {
+          
+          parse_env <- new.env()
+          parse_env$text = text
+          
+          lapply(patterns, FUN=function(x) {
+                  parse_env$text = gsup(x$pattern, x$group, parse_env$text)          
+              }
+          )
+
+          return(parse_env$text)
+      }
   )
 )
 
