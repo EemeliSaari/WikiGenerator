@@ -1,12 +1,21 @@
 library(methods)
 
 
-LANG_FLAG = 'fi'
-
-
 for (script in c('parser_engine', 'wikidata', 'wikinode')) {
     source(paste('src/', script, '.R', sep = '', collapse = ''))
 }
+
+
+LANG_MAP <- list(
+    file = list(
+        eng = 'File',
+        fi = 'Tiedosto'
+    ),
+    category = list(
+        eng = 'Category',
+        fi = 'Luokka'
+    )
+)
 
 
 WikiParser <- setClass(
@@ -15,17 +24,20 @@ WikiParser <- setClass(
     slots = c(
         options = 'vector',
         engine = 'ParserEngine',
-        data = 'WikiData'
+        data = 'WikiData',
+        verbose = 'logical'
     ),
-
     prototype = list(
         options = c(
-            #TODO
+            'file', 'sitations', 'tags', 'special_character',
+            'links_internal', 'links_external', 'category',
+            'sections', 'formating', 'list',
+            'identing', 'hidden', 'table'
         ),
-        engine = ParserEngine(lang = LANG_FLAG),
-        data = WikiData()
+        engine = ParserEngine(lang_map = LANG_MAP, lang = 'fi'),
+        data = WikiData(),
+        verbose = TRUE
     ),
-
     validity = function(object) {
         #TODO check the options
         return(TRUE)
@@ -45,20 +57,22 @@ setMethod(
     f = 'parse_text',
     signature = 'WikiParser',
     definition = function(obj, text) {
-        print('Starting the parsing...')
+        if (obj@verbose) {
+            print('Starting the parsing...')
+        }
         return(lapply(obj@engine$get_parts(text), FUN = function(x) {
             entry <- unlist(x)
             for (i in c(1:length(entry))) {
                 for (option in obj@options) {
-                    print(option)
                     command <- paste('obj@engine$parse_', option, '(entry[i])', sep = '')
-                    print(entry[i])
                     entry[i] <- eval(parse(text = command))
-                    print(entry[i])
                 }
             }
             out <- entry
         }))
+        if (obj@verbose) {
+            print('...Parsing done')
+        }
     }
 )
 
