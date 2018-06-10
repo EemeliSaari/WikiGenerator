@@ -41,13 +41,24 @@ parse_line <- function(line, sep) {
 
 
 load_id_content <- function(file, from, to, normalize = TRUE, index = 3) {
-    return(unlist(lapply(scan(file, '', skip = from, nlines = to, sep = '\n', quiet = TRUE),
-                FUN = function(x) {
-                    if (normalize == TRUE)
-                        x = gsub(' ', '_', x)
-                    out <- parse_line(x, sep = ';')[index]
-                }
-            )
+    result <- lapply(scan(file, '', skip = from, nlines = to, sep = '\n', quiet = TRUE),
+            FUN = function(x) {
+                if (normalize == TRUE)
+                    x = gsub(' ', '_', x)
+                out <- parse_line(x, sep = ';')[index]
+            }
         )
     )
+    return(unlist(result))
+}
+
+
+trim <- function(x) {
+    trimmed <- gsub("[\"\\#\\$\\'\\\\~*\\@\\[\\|]|\\s{2,}", ' ', x)
+    return(gsub('^\\s+|\\s+$', '', trimmed))
+}
+
+
+get_input_shape <- function(dataset) {
+
 }
