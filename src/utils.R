@@ -3,7 +3,9 @@
 library(httr)
 library(jsonlite)
 
+
 BASE_URL <- 'https://fi.wikipedia.org/w/api.php'
+
 
 query_base <- function(query) {
     return(GET(paste(BASE_URL, query, sep = '')))
@@ -37,7 +39,8 @@ parse_line <- function(line, sep) {
     return(parts)
 }
 
-load_id_content <- function(file, from, to, normalize=TRUE, index = 3) {
+
+load_id_content <- function(file, from, to, normalize = TRUE, index = 3) {
     return(unlist(lapply(scan(file, '', skip = from, nlines = to, sep = '\n', quiet = TRUE),
                 FUN = function(x) {
                     if (normalize == TRUE)
