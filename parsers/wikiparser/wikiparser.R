@@ -1,11 +1,6 @@
 library(methods)
 
 
-for (script in c('parser_engine', 'wikidata', 'wikinode')) {
-    source(paste('src/', script, '.R', sep = '', collapse = ''))
-}
-
-
 #Map different language specific words
 LANG_MAP <- list(
     file = list(

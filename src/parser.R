@@ -1,8 +1,8 @@
 # Scripts to parse Wikitext
 
 
-for (script in c('wikiparser', 'utils')) {
-    source(paste('src/', script, '.R', sep = '', collapse = ''))
+for(f in list.files('parsers/wikiparser')) {
+    source(paste('parsers/wikiparser/', f, sep = ''))
 }
 
 
@@ -31,18 +31,33 @@ parts_to_files <- function(parts, path) {
 }
 
 
-parse_files <- function(folder, target, verbose = FALSE) {
+parse_files <- function(folder, target, parser_options = c(), verbose = 0) {
     "Parse all the wikitext files from a folder."
+    print(folder)
     if (!file.exists(folder)) {
-        print(paste('ERROR path: ', folder, ' does not exists.'))
+        print(paste('ERROR path: ', folder, ' does not exists.', sep = ''))
         return(NULL)
     }
     if (!file.exists(target) && !dir.create(target)) {
-        print(paste('ERROR target path ', target, ' is invalid.'))
+        print(paste('ERROR target path ', target, ' is invalid.', sep = ''))
         return(NULL)
     }
 
-    parser <- WikiParser(verbose = verbose)
+    verbose_bool <- FALSE
+    if (!verbose %in% c(0, 1)) {
+        print(paste('Invalid verbose value: ', verbose, sep = ''))
+        return(NULL)
+    }
+    else if(verbose == 1) {
+        verbose_bool = TRUE
+    }
+
+    if (length(parser_options) == 0) {
+        parser <- WikiParser(verbose = verbose_bool)
+    }
+    else {
+        parser <- WikiParser(options = parser_options, verbose = verbose_bool)
+    }
 
     results <- lapply(list.files(folder), FUN = function(x) {
             file_path <- file.path(folder, x)
@@ -51,7 +66,6 @@ parse_files <- function(folder, target, verbose = FALSE) {
             parts_to_files(parsed, target_path)
         }
     )
-    print(results)
     return(NULL)
 }
 
@@ -68,7 +82,3 @@ test_parse <- function() {
     sprintf("Test took: %f", Sys.time() - start)
     return(NULL)
 }
-
-
-parse_files('M:/Projects/WikiGenerator/data/articles', 'M:/Projects/WikiGenerator/data/parsed')
-#test_parse()
