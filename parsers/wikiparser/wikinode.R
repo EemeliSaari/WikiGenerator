@@ -6,7 +6,6 @@ WikiNode <- setRefClass(
     fields = list(
         type = 'character',
         style = 'list',
-        content = 'character',
-        tokens = 'numeric'
+        content = 'character'
     )
 )

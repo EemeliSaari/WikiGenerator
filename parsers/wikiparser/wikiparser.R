@@ -6,6 +6,7 @@ for (script in c('parser_engine', 'wikidata', 'wikinode')) {
 }
 
 
+#Map different language specific words
 LANG_MAP <- list(
     file = list(
         eng = 'File',
@@ -27,6 +28,7 @@ WikiParser <- setClass(
         data = 'WikiData',
         verbose = 'logical'
     ),
+
     prototype = list(
         options = c(
             'file', 'sitations', 'tags', 'special_character',
@@ -38,12 +40,12 @@ WikiParser <- setClass(
         data = WikiData(),
         verbose = TRUE
     ),
+
     validity = function(object) {
         #TODO check the options
         return(TRUE)
     }
 )
-
 
 setGeneric(
     name = 'parse_text',
@@ -51,7 +53,6 @@ setGeneric(
         standardGeneric('parse_text')
     }
 )
-
 
 setMethod(
     f = 'parse_text',
@@ -76,14 +77,12 @@ setMethod(
     }
 )
 
-
 setGeneric(
     name = 'set_options',
     def = function(obj, options) {
         standardGeneric('set_options')
     }
 )
-
 
 setMethod(
      f = 'set_options',
@@ -94,14 +93,12 @@ setMethod(
      }
 )
 
-
 setGeneric(
     name = 'clear',
     def = function(obj) {
         standardGeneric('clear')
     }
 )
-
 
 setMethod(
     f = 'clear',
