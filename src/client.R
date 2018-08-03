@@ -1,8 +1,7 @@
 # Script to login client to MediaWiki
 
 library(methods)
-
-source('src/utils.R')
+library(httr)
 
 
 Client <- setRefClass('Client',
