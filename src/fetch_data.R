@@ -1,15 +1,12 @@
 # Script to featch data from wikipedia API
 
 library(httr)
-library(jsonlite)
-
-source('src/client.R')
 
 
-fetch_ids <- function(client, id_file) {
+fetch_ids <- function(client, target_folder) {
     "Fetches all the IDs and page tittles to a .csv file"
 
-    meta_file <- 'data/id_meta.json'
+    meta_file <- file.path(target_folder, 'id_meta.json')
     if (!file.exists(meta_file)) {
         meta <- list(apfrom = '', complete = FALSE)
     }
@@ -20,7 +17,8 @@ fetch_ids <- function(client, id_file) {
     if (meta$complete == TRUE) {
         return(NULL)
     }
-
+    
+    id_file <- file.path(target_folder, 'ids.csv')
     if (!file.exists(id_file)) {
         header <- 'ns;pageid;title'
         write(header, id_file)
@@ -62,17 +60,19 @@ fetch_ids <- function(client, id_file) {
         }
         print(content(result$body)$continue$apcontinue)
     }
+    return(1)
 }
 
 
-fetch_data <- function(client, id_file, target_folder, chunk_size = 50) {
+fetch_articles <- function(client, id_file, target_folder, chunk_size = 50) {
     "Fetches all the data using IDs"
 
-    dir.create(target_folder, showWarnings = FALSE)
+    articles <- file.path(target_folder, 'articles')
+    if (!file.exists(articles)) {
+        dir.create(articles)
+    }
 
-    print('asd')
-
-    meta_file <- 'data/data_meta.json'
+    meta_file <- file.path(target_folder, 'article_meta.json')
     if (!file.exists(meta_file)) {
         meta <- list(from = 1, complete = FALSE)
     }
@@ -104,7 +104,7 @@ fetch_data <- function(client, id_file, target_folder, chunk_size = 50) {
         }
         for (page in content(result$body)$query$pages) {
             name <- paste(page$pageid, '.txt', sep = '')
-            file_path <- file.path(target_folder, name)
+            file_path <- file.path(articles, name)
             cont <- unlist(page$revisions[[1]]['*'])
             if (!file.exists(file_path)) {
                 write(cont, file_path)
@@ -118,28 +118,45 @@ fetch_data <- function(client, id_file, target_folder, chunk_size = 50) {
             write(toJSON(meta), meta_file)
             break
         }
-
         write(toJSON(meta), meta_file)
     }
+    return(1)
 }
 
 
-fetcher <- function(data_paths) {
+fetcher <- function(login_method, fetch_method, target_folder, lang, user_data = NULL) {
     "Fetches the article ID's and then the articles with the ID's. Reads a data_paths variable in format list
     [id = id_path, data = articles_path, user = user_path]."
+    options$login_method, options$fetch_type, options$path, options$language, options$user_data
+    user_data <- NULL
+    switch (login_method,
+        'file' = user_data <- read_user_data(user_data),
+        'login' = user_data <- read_user_login()
+    )
 
-    user_data <- read_user(data_paths$user)
-
-    client <- Client(user_name = user_data$name, password = user_data$password, end_point=BASE_URL)
+    if (is.null(user_data)) {
+        print('You must login to WikiMedia in order to fetch data')
+        return(NULL)
+    }
+    
+    if (!file.exists(target_folder) && !dir.create(target_folder)) {
+        print('Invalid target path given')
+        return(NULL)
+    }
+    
+    print(user_data)
+    end_point <- paste('https://', lang, '.wikipedia.org/w/api.php', sep = '')
+    
+    client <- Client(user_name = user_data$name, password = user_data$password, end_point=end_point)
     client$login()
 
-    fetch_ids(client, data_paths$id)
-    fetch_data(client, data_paths$id, data_paths$data)
+    result <- NULL
+    switch (fetch_method,
+        'id' = result <- fetch_ids(client, target_folder),
+        'articles' = result <- fetch_articles(client, target_folder)
+    )
 
     client$logout()
 
     out <- NULL
 }
-
-
-fetcher(list(id = 'data/ids.csv', data = 'M:/Projects/WikiGenerator/data/articles/', user = 'data/user_data.json'))
