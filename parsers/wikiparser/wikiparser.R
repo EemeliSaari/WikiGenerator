@@ -100,6 +100,5 @@ setMethod(
     signature = 'WikiParser',
     definition = function(obj) {
         obj$data <- WikiData()
-        #return(NULL)
     }
 )

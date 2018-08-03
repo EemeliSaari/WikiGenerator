@@ -14,14 +14,14 @@ WikiData <- setClass(
 setGeneric(
     name = 'to_text',
     def = function(obj) {
-        standardGeneric('clear')
+        standardGeneric('to_text')
     }
 )
 
 setMethod(
     f = 'to_text',
-    signature = 'WikiParser',
+    signature = 'WikiData',
     definition = function(obj) {
-        
+        #TODO
     }
 )
