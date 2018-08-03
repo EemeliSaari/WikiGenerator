@@ -9,11 +9,16 @@ for(f in list.files('src')) {
 }
 
 read_args <- function(program) {
-    #Read the user commandline arguments
+    "Read the user commandline arguments"
 
     program_options = list(
         generate = list(
-            #TODO
+            make_option(c('-s', '--seed'), type = 'character',
+                default = FALSE, help = 'Generator seed'            
+            ),
+            make_option(c('-m', '--model'), type = 'character',
+                default = FALSE, help = 'Trained model used for generaing'            
+            )
         ),
         train = list(
             make_option(c('-m', '--model'), type = 'character',
@@ -69,15 +74,16 @@ read_args <- function(program) {
 
 
 handle_args <- function(opts) {
+    "Handles the option and starts the correct sub-program"
     program <- opts$args[1]
     options <- opts$options
-    #print(options)
     switch (program,
-        'parse' = parse_files(options$folder, options$target_folder, options$args[2:length(opts$args)], options$verbose),
-        'download' = fetcher(options$login_method, options$fetch_type, options$path, options$language, options$user_data),
-        'train' = print('reenaa'),
+        'parse' = parse_files(options=options),
+        'download' = fetcher(options=options),
+        'train' = train_model(options=options),
         'generate' = print('generois')
     )
+    return(NULL)
 }
 
 
@@ -91,7 +97,7 @@ check_model <- function() {
 }
 
 
-# Programm entry point
+# Program entry point
 main <- function() {
     argv <- commandArgs(trailingOnly = TRUE)
 
