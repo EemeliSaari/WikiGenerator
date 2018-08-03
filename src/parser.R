@@ -31,9 +31,17 @@ parts_to_files <- function(parts, path) {
 }
 
 
-parse_files <- function(folder, target, parser_options = c(), verbose = 0) {
+parse_files <- function(folder, target, parser_options = c(), verbose = 0, options = NULL) {
     "Parse all the wikitext files from a folder."
-    print(folder)
+    
+    # If options are given - override all the other parameters
+    if (!is.null(options)) {
+        folder <- options$folder    
+        target <- options$target_folder
+        parser_options <- options$args[2:length(opts$args)]
+        verbose <- options$verbose
+    }
+
     if (!file.exists(folder)) {
         print(paste('ERROR path: ', folder, ' does not exists.', sep = ''))
         return(NULL)
