@@ -2,23 +2,26 @@
 require(tensorflow)
 
 
-lstm_net <- function(options) {
-
-    tf$reset_default_graph()
+lstm_net <- function(batch_size, n_hidden, n_vocab) {
     
-    input_layer <- tf$placeholder(tf$float32, shape(options$batch_size, NULL, 1), name = 'input_tensor')
+    tf$reset_default_graph()
 
-    weights <- tf$Variable(tf$random_normal(shape(options$n_hidden, options$n_vocab), dtype = tf$float32), dtype=tf$float32)
-    biases <- tf$Variable(tf$random_normal(shape(options$n_vocab), dtype = tf$float32), dtype = tf$float32)
+    dt <- tf$float32
+    
+    input_layer <- tf$placeholder(dt, shape(batch_size, NULL, 1), name = 'input_tensor')
 
-    lstm_cell <- tf$contrib$rnn$LSTMCell(options$n_hidden)
+    weights <- tf$Variable(tf$random_normal(shape(n_hidden, n_vocab), dtype = dt), dtype = dt)
+    biases <- tf$Variable(tf$random_normal(shape(n_vocab), dtype = dt), dtype = dt)
 
-    initial_state <- lstm_cell$zero_state(options$batch_size, dtype=tf$float32)
-    lstm_layer <- tf$nn$dynamic_rnn(cell = lstm_cell, inputs = input_layer, initial_state = initial_state, dtype = tf$float32)
+    lstm_cell <- tf$contrib$rnn$LSTMCell(n_hidden)
+
+    initial_state <- lstm_cell$zero_state(batch_size = batch_size, dtype = dt)
+
+    lstm_layer <- tf$nn$dynamic_rnn(cell = lstm_cell, inputs = input_layer, initial_state = initial_state, dtype = dt)
 
     outputs <- lstm_layer[[1]]
 
     pred <- tf$matmul(outputs[-1], weights) + biases
-
+    print(pred)
     return(pred)
 }
