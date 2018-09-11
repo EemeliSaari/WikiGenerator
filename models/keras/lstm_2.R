@@ -1,14 +1,12 @@
-# 1 LSTM cell model
+# 2 LSTM cell model
 
 
 library(keras)
 
 
-source('src/utils.R')
-
-
-lstm_2 <- function(input_shape, vocab_size) {
-    model <- keras_model_sequential() %>%
+lstm_2 <- function(vocab_size, input_shape=c(NULL, 1)) {
+    model <- keras_model_sequential() 
+    model %>%
         layer_lstm(
             units = 64,
             input_shape = input_shape,
