@@ -8,7 +8,8 @@ lstm_net <- function(batch_size, n_hidden, n_vocab) {
 
     dt <- tf$float32
     
-    input_layer <- tf$placeholder(dt, shape(batch_size, NULL, 1), name = 'input_tensor')
+    x <- tf$placeholder(dt, shape(batch_size, NULL, 28), name = 'input_layer')
+    y <- tf$placeholder(tf$float32, shape(batch_size, 10), name = 'output_layer')
 
     weights <- tf$Variable(tf$random_normal(shape(n_hidden, n_vocab), dtype = dt), dtype = dt)
     biases <- tf$Variable(tf$random_normal(shape(n_vocab), dtype = dt), dtype = dt)
@@ -17,11 +18,11 @@ lstm_net <- function(batch_size, n_hidden, n_vocab) {
 
     initial_state <- lstm_cell$zero_state(batch_size = batch_size, dtype = dt)
 
-    lstm_layer <- tf$nn$dynamic_rnn(cell = lstm_cell, inputs = input_layer, initial_state = initial_state, dtype = dt)
+    lstm_layer <- tf$nn$dynamic_rnn(cell = lstm_cell, inputs = x, initial_state = initial_state, dtype = dt)
 
     outputs <- lstm_layer[[1]]
 
     pred <- tf$matmul(outputs[-1], weights) + biases
-    print(pred)
-    return(pred)
+
+    return(list(pred,y))
 }
