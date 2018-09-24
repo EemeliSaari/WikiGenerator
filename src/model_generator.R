@@ -36,11 +36,13 @@ generate_model <- function(options) {
     c(options, n_hidden) := pop_from_list(options, "n_hidden")
     c(options, n_vocab) := pop_from_list(options, "n_vocab")
 
-    net <- lstm_net(batch_size, n_hidden, n_vocab)
+    c(net, y) := lstm_net(batch_size, n_hidden, n_vocab)
+
+    cost <- tf$reduce_mean(tf$nn$softmax_cross_entropy_with_logits(logits=net, labels=y))
 
     optimizer <- get_optimizer(optimizer, options)
 
-    net <- optimizer.minimize(net)
+    net <- optimizer$minimize(cost)
 
-    return(net)
+    return(list(net, y))
 }
