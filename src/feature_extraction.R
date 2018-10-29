@@ -47,12 +47,12 @@ text_vectorizer <- function(data) {
     len <- length(chars)
 
     dataset <- encoded
-    dataset <- lapply(encoded, FUN=function(x){
-            zeros <- rep(0, len)
-            zeros[x] = 1
-            out <- zeros
-        }
-    )
+    #dataset <- lapply(encoded, FUN=function(x){
+    #        zeros <- rep(0, len)
+    #        zeros[x] = 1
+    #        out <- zeros
+    #    }
+    #)
     
     return(list(dataset, chars))
 }
@@ -68,11 +68,11 @@ sequencing <- function(vec, seq_length=5, step=1) {
     return(list(X, y))
 }
 
-parsed <- lapply(unlist(readLines('data/articles/13422.txt')), FUN=function(x) {if(x != '') x else NULL})
+parsed <- lapply(unlist(readLines('data/articles/926.txt')), FUN=function(x) {if(x != '') x else NULL})
 parsed <- parsed[-which(sapply(parsed, is.null))]
 
 text <- paste(unlist(parsed), collapse = '<br />')
-
+print(text)
 c(dataset, chars) := text_vectorizer(text)
 
 #print(chars)
@@ -83,7 +83,6 @@ batch_generator <- function(options) {
 }
 
 opt <- list(
-    batch_size = 128,
     n_vocab = length(chars),
     seq_len = 40,
     n_hidden = 128,
@@ -91,21 +90,9 @@ opt <- list(
     interface = 'tensorflow',
     optimizer = 'AdamOptimizer'
 )
-tf$reset_default_graph()
 
-c(net, output_layer) := generate_model(opt)
+batch_size = 40
 
 c(X, y) := sequencing(dataset, seq_length = opt$seq_len)
 
-sess <- tf$Session()
-sess$run(tf$global_variables_initializer())
 
-input_layer <- sess$graph$get_tensor_by_name('input_layer:0')
-output_layer <- sess$graph$get_tensor_by_name('output_layer:0')
-
-for(i in seq(1, length(X), opt$batch_size)) {
-    batch_X <- X[i:opt$batch_size]
-    batch_y <- y[i:opt$batch_size]
-    sess$run(net, feed_dict = dict(input_layer = batch_X, output_layer = batch_y))
-}
-sess$close()

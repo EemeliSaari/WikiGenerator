@@ -1,23 +1,27 @@
-# 2 LSTM cell model
+# 1 LSTM cell model
 
 
 library(keras)
 
 
-source('src/utils.R')
-
-
-lstm_1 <- function(input_shape, vocab_size) {
-    model <- keras_model_sequential() %>%
+lstm_1 <- function(n_vocab, seq_len) {
+    model <- keras_model_sequential()
+    model %>%
+        layer_embedding(
+            #input_dim = n_vocab,
+            output_dim = 50,
+            input_length = seq_len,
+            input_shape = c(seq_len)
+        ) %>%
         layer_lstm(
-            units=64,
-            input_shape = input_shape,
-            return_sequences=TRUE
+            units = 128
         ) %>%
         time_distributed(
             layer_dense(
-                units = vocab_size,
+                units = n_vocab,
                 activation = 'softmax'
             )
         )
 }
+
+summary(lstm_1(40, 128))
