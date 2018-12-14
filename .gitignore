@@ -2,3 +2,5 @@
 *.Rhistory
 data/
 .Rproj.user
+*.txt
+*.csv
