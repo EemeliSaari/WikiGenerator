@@ -23,5 +23,3 @@ lstm_1 <- function(n_vocab, seq_len) {
             )
         )
 }
-
-summary(lstm_1(40, 128))
